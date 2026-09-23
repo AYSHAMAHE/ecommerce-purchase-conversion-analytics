@@ -233,30 +233,30 @@ with left:
 with right:
     f = f.copy()
 
+    bands = ["0", "0-5", "5-20", "20-50", "50+"]
+
     f["Page Value Band"] = pd.cut(
         f["PageValues"],
         bins=[-0.001, 0, 5, 20, 50, float("inf")],
-        labels=["0", "0-5", "5-20", "20-50", "50+"],
+        labels=bands,
         include_lowest=True
-    ).astype(str)
-
-    band_order = ["0", "0-5", "5-20", "20-50", "50+"]
+    )
 
     p = (
         f.groupby("Page Value Band", observed=False)["Revenue"]
         .mean()
-        .reindex(band_order)
+        .reindex(bands)
         .reset_index()
     )
 
     p["Conversion Rate"] = p["Revenue"] * 100
+    p["x"] = list(range(len(bands)))
 
     fig = px.bar(
         p,
-        x="Page Value Band",
+        x="x",
         y="Conversion Rate",
         text="Conversion Rate",
-        category_orders={"Page Value Band": band_order},
         color="Page Value Band",
         color_discrete_sequence=[
             "#b8c4d6",
@@ -267,17 +267,23 @@ with right:
         ]
     )
 
+    fig = polish(fig, "Conversion Rate by Page Value Band")
+
     fig.update_traces(
         texttemplate="%{text:.1f}%",
         textposition="outside"
     )
 
+    fig.update_xaxes(
+        tickmode="array",
+        tickvals=[0, 1, 2, 3, 4],
+        ticktext=bands,
+        title="Page Value Band"
+    )
+
     fig.update_layout(
-        title="Conversion Rate by Page Value Band",
-        yaxis_title="Conversion Rate (%)",
-        xaxis_title="Page Value Band",
-        yaxis=dict(range=[0, 100]),
-        showlegend=False
+        showlegend=False,
+        yaxis=dict(range=[0, 100])
     )
 
     with st.container(border=True):
