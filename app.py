@@ -231,17 +231,48 @@ with left:
         st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
 with right:
-    f = f.copy()
-    f["Page Value Band"] = pd.cut(f["PageValues"], [-0.001, 0, 5, 20, 50, float("inf")],
-                                   labels=["0", "0–5", "5–20", "20–50", "50+"])
-    p = f.groupby("Page Value Band", observed=False, as_index=False)["Revenue"].mean()
-    p["Conversion Rate"] = p["Revenue"] * 100
-    fig = px.bar(p, x="Page Value Band", y="Conversion Rate", text="Conversion Rate",
-                 color="Page Value Band", color_discrete_sequence=["#b8c4d6", "#7aaed6", "#4e91c6", "#1769aa", "#00a6a6"])
-    fig = polish(fig, "Conversion Rate by Page Value Band")
-    with st.container(border=True):
-        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+    f_page = f.copy()
+    f_page["PageValues"] = pd.to_numeric(f_page["PageValues"], errors="coerce")
 
+    f_page["Page Value Band"] = pd.cut(
+        f_page["PageValues"],
+        bins=[-0.001, 0, 5, 20, 50, float("inf")],
+        labels=["0", "0–5", "5–20", "20–50", "50+"],
+        include_lowest=True
+    )
+
+    p = (
+        f_page.groupby("Page Value Band", observed=False)["Revenue"]
+        .mean()
+        .reset_index()
+    )
+
+    p["Conversion Rate"] = p["Revenue"] * 100
+
+    fig = px.bar(
+        p,
+        x="Page Value Band",
+        y="Conversion Rate",
+        text="Conversion Rate",
+        color="Page Value Band",
+        color_discrete_sequence=["#8bc4d6", "#7aaed6", "#4e91c6", "#1769aa", "#00a6a6"]
+    )
+
+    fig.update_traces(texttemplate="%{text:.1f}%", textposition="outside")
+    fig.update_layout(
+        yaxis_title="Conversion Rate (%)",
+        xaxis_title="Page Value Band",
+        showlegend=False
+    )
+
+    fig = polish(fig, "Conversion Rate by Page Value Band")
+
+    with st.container(border=True):
+        st.plotly_chart(
+            fig,
+            use_container_width=True,
+            config={"displayModeBar": False}
+        )
 # -----------------------------
 # Business insights
 # -----------------------------
