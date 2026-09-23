@@ -1,5 +1,7 @@
 # E-Commerce Purchase Conversion Analytics
+### 🚀 Live Dashboard
 
+[Open the Live Streamlit Dashboard](https://ecommerce-purchase-conversion-analytics-kcmxhachnuuhltgfkxk72n.streamlit.app/)
 ## Project Overview
 This project analyzes online shopping sessions to identify behavioral patterns associated with completed purchases and convert those findings into actionable business insights.
 
